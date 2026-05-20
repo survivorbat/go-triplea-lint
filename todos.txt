@@ -1,0 +1,45 @@
+MISSING TEST CASES
+==================
+
+COMPLEX TEST STRUCTURES
+- Nested subtests (t.Run within t.Run)
+- defer statements before Act
+- t.Cleanup() calls before Act
+- Multiple defer mixed with arrange code
+
+ACT DETECTION EDGE CASES
+- Method chains: result := svc.New().Init().Execute()
+- Multi-line method chains
+- Act with error handling: result, err := Foo(); if err != nil { t.Fatal(err) }
+- Tests where Act cannot be determined (should skip silently)
+
+TEST NAMING PATTERNS
+- Acronyms: TestHTTPServer_Get, TestAPIHandler_Do
+- Numbers: TestV2API_Create, Test123_Something
+- 4+ segments: TestA_B_C_D_E
+- No underscores: TestSimple
+
+ASSERT EDGE CASES
+- Test with no assertions after Act
+- Multiple assertion blocks
+- Assertions in loops
+- Conditional assertions
+
+SUITE SPECIFIC
+- Suite with nested Run calls
+- Suite methods calling other suite methods
+
+ARRANGE EXCEPTION EDGE CASES
+- Variable shadowing: t := t in subtests
+- Multiple t.Parallel() calls
+- Assignment that looks like *testing.T but isn't
+
+TABLE-DRIVEN EDGE CASES
+- Slice-based tables: []struct instead of map[string]struct
+- Table tests without t.Run
+
+REAL-WORLD PATTERNS
+- Complex fixture setup with multiple assignments
+- testify/require vs testify/assert
+- t.Skip() calls
+- testing.TB interface usage
