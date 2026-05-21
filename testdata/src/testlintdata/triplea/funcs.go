@@ -48,6 +48,10 @@ func WaveGoodMorning(name string) string {
 	return "👋 Good morning " + name
 }
 
+func WaveGoodLateMorning(name string) string {
+	return "👋 Good late morning " + name
+}
+
 func WaveGoodEvening(name string) string {
 	return "👋 Good evening " + name
 }

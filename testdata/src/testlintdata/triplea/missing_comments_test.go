@@ -9,7 +9,7 @@ import (
 func TestWaveHello(t *testing.T) {
 	t.Parallel()
 	name := "Josh"                        // want `// Arrange statement expected`
-	actual := SayHello(name)              // want `// Act statement expected`
+	actual := WaveHello(name)             // want `// Act statement expected`
 	assert.Equal(t, "Hello Josh", actual) // want `// Assert statement expected`
 }
 
@@ -17,12 +17,12 @@ func TestWaveGoodBye(t *testing.T) {
 	name := "Josh" // want `// Arrange statement expected`
 
 	// Act
-	actual := SayGoodbye(name)
+	actual := WaveGoodbye(name)
 	assert.Equal(t, "Goodbye Josh", actual) // want `// Assert statement expected`
 }
 
 func TestWaveGoodMorning(t *testing.T) {
-	actual := SayGoodMorning("Josh") // want `// Act statement expected`
+	actual := WaveGoodMorning("Josh") // want `// Act statement expected`
 
 	// Assert
 	assert.Equal(t, "Good morning Josh", actual)
@@ -30,7 +30,7 @@ func TestWaveGoodMorning(t *testing.T) {
 
 func TestWaveGoodLateMorning(t *testing.T) {
 	t.Parallel()
-	actual := SayGoodLateMorning("Josh") // want `// Act statement expected`
+	actual := WaveGoodLateMorning("Josh") // want `// Act statement expected`
 
 	// Assert
 	assert.Equal(t, "Good late morning Josh", actual)
@@ -49,7 +49,7 @@ func TestWaveGoodEvening(t *testing.T) {
 
 	for name, testData := range tests {
 		t.Run(name, func(t *testing.T) {
-			actual := SayGoodEvening(testData.input)   // want `// Act statement expected`
+			actual := WaveGoodEvening(testData.input)  // want `// Act statement expected`
 			assert.Equal(t, testData.expected, actual) // want `// Assert statement expected`
 		})
 	}
@@ -69,8 +69,8 @@ func TestWaveGoodAfternoon(t *testing.T) {
 	for name, testData := range tests {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			actual := SayGoodAfternoon(testData.input) // want `// Act statement expected`
-			assert.Equal(t, testData.expected, actual) // want `// Assert statement expected`
+			actual := WaveGoodAfternoon(testData.input) // want `// Act statement expected`
+			assert.Equal(t, testData.expected, actual)  // want `// Assert statement expected`
 		})
 	}
 }
@@ -89,7 +89,7 @@ func TestWaveGoodDay(t *testing.T) {
 	for name, testData := range tests {
 		t.Run(name, func(t *testing.T) {
 			input := testData.input                    // want `// Arrange statement expected`
-			actual := SayGoodDay(input)                // want `// Act statement expected`
+			actual := WaveGoodDay(input)               // want `// Act statement expected`
 			assert.Equal(t, testData.expected, actual) // want `// Assert statement expected`
 		})
 	}
@@ -110,7 +110,7 @@ func TestWaveGoodNight(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			input := testData.input                    // want `// Arrange statement expected`
-			actual := SayGoodNight(input)              // want `// Act statement expected`
+			actual := WaveGoodNight(input)             // want `// Act statement expected`
 			assert.Equal(t, testData.expected, actual) // want `// Assert statement expected`
 		})
 	}

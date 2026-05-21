@@ -18,92 +18,85 @@ func Analyzer() *analysis.Analyzer {
 }
 
 func run(pass *analysis.Pass) (any, error) {
-	testFuncs := findTestFunctions(pass)
-	testFuncs = expandSubtests(pass, testFuncs)
+	testFiles := findTestFunctions(pass)
 
-	for testFile, testFunctions := range testFuncs {
-		for _, testFunc := range testFunctions {
-			// Empty test, not our problem
-			if len(testFunc.Body.List) == 0 {
-				continue
-			}
-
-			nameComponents := testNameComponents(testFunc.Name.Name)
-
-			actIndex, ok := findAct(testFunc.Body.List, nameComponents)
-			if !ok {
-				continue
-			}
-
-			actStatement := testFunc.Body.List[actIndex]
-
-			startPos := testFunc.Pos()
-			endPos := testFunc.End()
-
-			// NoticE: This does include the // Act itself
-			commentsBeforeAct := findCommentsBetween(testFile.Comments, startPos, actStatement.Pos())
-			commentsAfterAct := findCommentsBetween(testFile.Comments, actStatement.Pos(), endPos)
-
-			// If the actIndex is 0, it means it is the first and only call in the function. If it is 1 and the
-			// call at 0 is t.Parallel OR t := suite.T(), it also means that no arrange is necessary. If both conditions are
-			// false, then an arrange is required
-			if isArrangeRequired(pass, actIndex, testFunc.Body.List) {
-				if len(commentsBeforeAct) < 2 {
-					pass.Report(analysis.Diagnostic{
-						Pos:     testFunc.Body.List[0].Pos(),
-						End:     testFunc.Body.List[0].End(),
-						Message: "// Arrange statement expected",
-					})
-				} else if !strings.Contains(commentsBeforeAct[0].Text(), "Arrange") {
-					pass.Report(analysis.Diagnostic{
-						Pos:     testFunc.Body.List[0].Pos(),
-						End:     testFunc.Body.List[0].End(),
-						Message: "// Arrange statement expected",
-					})
+	for testFile, testFuncs := range testFiles {
+		for _, testFunc := range testFuncs {
+			for _, testBlock := range findTestBlocks(pass, testFunc) {
+				// Empty test, not our problem
+				if len(testBlock.List) == 0 {
+					continue
 				}
-			}
 
-			// Check if any comments are before the act
-			if len(commentsBeforeAct) == 0 {
-				pass.Report(analysis.Diagnostic{
-					Pos:     actStatement.Pos(),
-					End:     actStatement.End(),
-					Message: "// Act statement expected",
-				})
-			} else {
-				closestComment := commentsBeforeAct[len(commentsBeforeAct)-1]
-				if !strings.Contains(closestComment.Text(), "Act") {
+				nameComponents := testNameComponents(testFunc.Name.Name)
+
+				actIndex, ok := findAct(testBlock.List, nameComponents)
+				if !ok {
+					continue
+				}
+
+				actStatement := testBlock.List[actIndex]
+
+				// NoticE: This does include the // Act itself
+				commentsBeforeAct := findCommentsBetween(testFile.Comments, testBlock.Pos(), actStatement.Pos())
+				commentsAfterAct := findCommentsBetween(testFile.Comments, actStatement.Pos(), testBlock.End())
+
+				// If the actIndex is 0, it means it is the first and only call in the function. If it is 1 and the
+				// call at 0 is t.Parallel OR t := suite.T(), it also means that no arrange is necessary. If both conditions are
+				// false, then an arrange is required
+				arrangeExceptions, ok := isArrangeRequired(pass, actIndex, testBlock.List)
+				if ok {
+					if len(commentsBeforeAct) < 1 || !strings.Contains(commentsBeforeAct[0].Text(), "Arrange") {
+						pass.Report(analysis.Diagnostic{
+							Pos:     testBlock.List[arrangeExceptions].Pos(),
+							End:     testBlock.List[arrangeExceptions].End(),
+							Message: "// Arrange statement expected",
+						})
+					}
+				}
+
+				// Check if any comments are before the act
+				if len(commentsBeforeAct) == 0 {
 					pass.Report(analysis.Diagnostic{
 						Pos:     actStatement.Pos(),
 						End:     actStatement.End(),
 						Message: "// Act statement expected",
 					})
+				} else {
+					closestComment := commentsBeforeAct[len(commentsBeforeAct)-1]
+					if !strings.Contains(closestComment.Text(), "Act") {
+						pass.Report(analysis.Diagnostic{
+							Pos:     actStatement.Pos(),
+							End:     actStatement.End(),
+							Message: "// Act statement expected",
+						})
+					}
 				}
-			}
 
-			// Check if statements exist after the Act
-			if len(testFunc.Body.List) > actIndex+1 {
-				afterActStatement := testFunc.Body.List[actIndex+1]
-				if len(commentsAfterAct) == 0 {
+				// Check if statements exist after the Act
+				if len(testBlock.List) > actIndex+1 {
+					afterActStatement := testBlock.List[actIndex+1]
+					if len(commentsAfterAct) == 0 {
+						pass.Report(analysis.Diagnostic{
+							Pos:     afterActStatement.Pos(),
+							End:     afterActStatement.End(),
+							Message: "// Assert statement expected",
+						})
+					} else if !strings.Contains(commentsAfterAct[0].Text(), "Assert") {
+						pass.Report(analysis.Diagnostic{
+							Pos:     afterActStatement.Pos(),
+							End:     afterActStatement.End(),
+							Message: "// Assert statement expected",
+						})
+					}
+				} else {
+					// If not, something is wrong
 					pass.Report(analysis.Diagnostic{
-						Pos:     afterActStatement.Pos(),
-						End:     afterActStatement.End(),
-						Message: "// Assert statement expected",
-					})
-				} else if !strings.Contains(commentsAfterAct[0].Text(), "Assert") {
-					pass.Report(analysis.Diagnostic{
-						Pos:     afterActStatement.Pos(),
-						End:     afterActStatement.End(),
+						Pos:     actStatement.Pos(),
+						End:     actStatement.End(),
 						Message: "// Assert statement expected",
 					})
 				}
-			} else {
-				// If not, something is wrong
-				pass.Report(analysis.Diagnostic{
-					Pos:     actStatement.Pos(),
-					End:     actStatement.End(),
-					Message: "// Assert statement expected",
-				})
 			}
 		}
 	}
@@ -112,15 +105,18 @@ func run(pass *analysis.Pass) (any, error) {
 }
 
 // isArrangeRequired determines whether the code should have an arrange statement. This
-// statement is only necessary if there is non-setup code above the Act statemet.
-func isArrangeRequired(pass *analysis.Pass, actIndex int, statements []ast.Stmt) bool {
+// statement is only necessary if there is non-setup code above the Act statement. The first
+// return value indicates how many statements are considered exceptions.
+//
+// Future-proof implementation
+func isArrangeRequired(pass *analysis.Pass, actIndex int, statements []ast.Stmt) (int, bool) {
 	switch {
 	case actIndex == 0:
-		return false
+		return 0, false
 	case actIndex == 1 && isArrangeException(pass, statements[0]):
-		return false
+		return 1, false
 	default:
-		return true
+		return 0, true
 	}
 }
 
@@ -138,6 +134,7 @@ func findCommentsBetween(comments []*ast.CommentGroup, from token.Pos, to token.
 	return result
 }
 
+// findTestFunctions finds all the functions that run tests
 func findTestFunctions(pass *analysis.Pass) map[*ast.File][]*ast.FuncDecl {
 	tests := make(map[*ast.File][]*ast.FuncDecl, len(pass.Files))
 
@@ -162,28 +159,21 @@ func findTestFunctions(pass *analysis.Pass) map[*ast.File][]*ast.FuncDecl {
 	return tests
 }
 
-func expandSubtests(pass *analysis.Pass, testFiles map[*ast.File][]*ast.FuncDecl) map[*ast.File][]*ast.FuncDecl {
-	output := make(map[*ast.File][]*ast.FuncDecl, len(testFiles))
-
-	for testFile, testFunctions := range testFiles {
-		for _, testFunc := range testFunctions {
-			subTests, ok := findSubTests(pass, testFunc.Body.List)
-			if !ok {
-				output[testFile] = append(output[testFile], testFunc)
-				continue
-			}
-
-			output[testFile] = append(output[testFile], subTests...)
-		}
+// findTestBlocks attempts to find all test blocks, which could either be the function block itself
+// or multiple subtests
+func findTestBlocks(pass *analysis.Pass, testFunc *ast.FuncDecl) []*ast.BlockStmt {
+	subTests, ok := findSubTests(pass, testFunc.Body.List)
+	if ok {
+		return subTests
 	}
 
-	return output
+	return []*ast.BlockStmt{testFunc.Body}
 }
 
 // findSubTests recursively walks through the given statements hunting for subtests, if any are found they
 // are returned. The boolean indicates if any were found.
-func findSubTests(pass *analysis.Pass, statements []ast.Stmt) ([]*ast.FuncDecl, bool) {
-	var result []*ast.FuncDecl
+func findSubTests(pass *analysis.Pass, statements []ast.Stmt) ([]*ast.BlockStmt, bool) {
+	var result []*ast.BlockStmt
 
 	for _, statement := range statements {
 		ast.Inspect(statement, func(node ast.Node) bool {
@@ -213,6 +203,8 @@ func findSubTests(pass *analysis.Pass, statements []ast.Stmt) ([]*ast.FuncDecl, 
 				result = append(result, subTests...)
 				return true
 			}
+
+			result = append(result, subTestFunction.Body)
 
 			return true
 		})
@@ -284,14 +276,13 @@ func isCall(pass *analysis.Pass, statement ast.Stmt, selector string, typeName s
 			return true
 		}
 
-		ast.Print(pass.Fset, selectorExp)
-
-		typeT, ok := pass.TypesInfo.Types[selectorExp]
+		typeT, ok := pass.TypesInfo.Types[selectorExp.X]
 		if !ok {
 			return true
 		}
 
 		isCall = selectorExp.Sel.Name == selector && typeT.Type.String() == typeName
+
 		return false
 	})
 

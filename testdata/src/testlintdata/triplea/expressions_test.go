@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewPerson(t *testing.T) {
-	person := NewPerson("Josh", 30) // want `// Act statement expected`
+	person := NewPerson("Josh", 30)      // want `// Act statement expected`
 	assert.Equal(t, "Josh", person.Name) // want `// Assert statement expected`
 }
 
@@ -21,7 +21,7 @@ func TestNewPersonValid(t *testing.T) {
 
 func TestPersonStructInit(t *testing.T) {
 	person := Person{Name: "Josh", Age: 30} // want `// Act statement expected`
-	assert.Equal(t, "Josh", person.Name) // want `// Assert statement expected`
+	assert.Equal(t, "Josh", person.Name)    // want `// Assert statement expected`
 }
 
 func TestPersonStructInitValid(t *testing.T) {
@@ -34,7 +34,7 @@ func TestPersonStructInitValid(t *testing.T) {
 
 func TestPersonPointerInit(t *testing.T) {
 	person := &Person{Name: "Josh", Age: 30} // want `// Act statement expected`
-	assert.Equal(t, "Josh", person.Name) // want `// Assert statement expected`
+	assert.Equal(t, "Josh", person.Name)     // want `// Assert statement expected`
 }
 
 func TestPersonPointerInitValid(t *testing.T) {
@@ -50,7 +50,7 @@ func TestGetPersonAge(t *testing.T) {
 	person := &Person{Name: "Josh", Age: 30}
 
 	age := GetPersonAge(person) // want `// Act statement expected`
-	assert.Equal(t, 30, age) // want `// Assert statement expected`
+	assert.Equal(t, 30, age)    // want `// Assert statement expected`
 }
 
 func TestGetPersonAgeValid(t *testing.T) {
@@ -68,7 +68,7 @@ func TestPersonGreet(t *testing.T) {
 	// Arrange
 	person := &Person{Name: "Josh", Age: 30}
 
-	greeting := person.Greet() // want `// Act statement expected`
+	greeting := person.Greet()                   // want `// Act statement expected`
 	assert.Equal(t, "Hello, I'm Josh", greeting) // want `// Assert statement expected`
 }
 
@@ -87,7 +87,7 @@ func TestPersonFieldAccess(t *testing.T) {
 	// Arrange
 	person := &Person{Name: "Josh", Age: 30}
 
-	name := person.Name // want `// Act statement expected`
+	name := person.Name           // want `// Act statement expected`
 	assert.Equal(t, "Josh", name) // want `// Assert statement expected`
 }
 
@@ -142,7 +142,7 @@ func TestNestedFieldAccessValid(t *testing.T) {
 
 func TestSliceInit(t *testing.T) {
 	slice := []string{"a", "b", "c"} // want `// Act statement expected`
-	assert.Len(t, slice, 3) // want `// Assert statement expected`
+	assert.Len(t, slice, 3)          // want `// Assert statement expected`
 }
 
 func TestSliceInitValid(t *testing.T) {
@@ -155,7 +155,7 @@ func TestSliceInitValid(t *testing.T) {
 
 func TestMapInit(t *testing.T) {
 	m := map[string]int{"a": 1, "b": 2} // want `// Act statement expected`
-	assert.Len(t, m, 2) // want `// Assert statement expected`
+	assert.Len(t, m, 2)                 // want `// Assert statement expected`
 }
 
 func TestMapInitValid(t *testing.T) {
@@ -170,7 +170,7 @@ func TestSliceIndexAccess(t *testing.T) {
 	// Arrange
 	slice := []string{"a", "b", "c"}
 
-	item := slice[0] // want `// Act statement expected`
+	item := slice[0]           // want `// Act statement expected`
 	assert.Equal(t, "a", item) // want `// Assert statement expected`
 }
 
@@ -189,7 +189,7 @@ func TestMapKeyAccess(t *testing.T) {
 	// Arrange
 	m := map[string]int{"a": 1, "b": 2}
 
-	value := m["a"] // want `// Act statement expected`
+	value := m["a"]           // want `// Act statement expected`
 	assert.Equal(t, 1, value) // want `// Assert statement expected`
 }
 
@@ -208,7 +208,7 @@ func TestTypeAssertion(t *testing.T) {
 	// Arrange
 	var i interface{} = "hello"
 
-	str := i.(string) // want `// Act statement expected`
+	str := i.(string)             // want `// Act statement expected`
 	assert.Equal(t, "hello", str) // want `// Assert statement expected`
 }
 
@@ -228,7 +228,7 @@ func TestTypeAssertionWithOk(t *testing.T) {
 	var i interface{} = "hello"
 
 	str, ok := i.(string) // want `// Act statement expected`
-	assert.True(t, ok) // want `// Assert statement expected`
+	assert.True(t, ok)    // want `// Assert statement expected`
 	assert.Equal(t, "hello", str)
 }
 
@@ -248,7 +248,7 @@ func TestChainedMethodCalls(t *testing.T) {
 	// Arrange
 	person := &Person{Name: "Josh", Age: 30}
 
-	greeting := person.Greet() // want `// Act statement expected`
+	greeting := person.Greet()           // want `// Act statement expected`
 	assert.Contains(t, greeting, "Josh") // want `// Assert statement expected`
 }
 
