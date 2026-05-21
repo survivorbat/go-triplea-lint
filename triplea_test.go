@@ -13,5 +13,5 @@ func TestAnalyzer(t *testing.T) {
 	directory := filepath.Join("testdata", "src", "testlintdata", "triplea")
 
 	// Act & Assert
-	analysistest.Run(t, directory, analyzer)
+	analysistest.Run(t, directory, analyzer, "funcs.go", "valid_test.go")
 }

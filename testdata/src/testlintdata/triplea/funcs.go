@@ -63,3 +63,67 @@ func WaveGoodDay(name string) string {
 func WaveGoodNight(name string) string {
 	return "👋 Good night " + name
 }
+
+// Types for expression tests
+
+type Person struct {
+	Name string
+	Age  int
+}
+
+type Address struct {
+	Street string
+	City   string
+}
+
+type Company struct {
+	Name    string
+	Address Address
+}
+
+func NewPerson(name string, age int) *Person {
+	return &Person{Name: name, Age: age}
+}
+
+func NewCompany(name string) *Company {
+	return &Company{Name: name}
+}
+
+func CreateAddress(street, city string) Address {
+	return Address{Street: street, City: city}
+}
+
+func GetPersonAge(p *Person) int {
+	return p.Age
+}
+
+func (p *Person) Greet() string {
+	return "Hello, I'm " + p.Name
+}
+
+func (p *Person) SetName(name string) {
+	p.Name = name
+}
+
+// For suite tests
+
+type UserService struct {
+	users map[string]*Person
+}
+
+func NewUserService() *UserService {
+	return &UserService{users: make(map[string]*Person)}
+}
+
+func (s *UserService) AddUser(p *Person) {
+	s.users[p.Name] = p
+}
+
+func (s *UserService) GetUser(name string) (*Person, bool) {
+	user, ok := s.users[name]
+	return user, ok
+}
+
+func (s *UserService) DeleteUser(name string) {
+	delete(s.users, name)
+}
