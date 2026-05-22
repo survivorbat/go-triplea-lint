@@ -1,6 +1,7 @@
 package linters
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"slices"
@@ -38,8 +39,8 @@ func run(pass *analysis.Pass) (any, error) {
 				actStatement := testBlock.List[actIndex]
 
 				// NoticE: This does include the // Act itself
-				commentsBeforeAct := findCommentsBetween(testFile.Comments, testBlock.Pos(), actStatement.Pos())
-				commentsAfterAct := findCommentsBetween(testFile.Comments, actStatement.Pos(), testBlock.End())
+				commentsBeforeAct := findCommentsBetweenLines(pass, testFile.Comments, testBlock.Pos(), actStatement.End())
+				commentsAfterAct := findCommentsBetweenLines(pass, testFile.Comments, actStatement.End(), testBlock.End())
 
 				// If the actIndex is 0, it means it is the first and only call in the function. If it is 1 and the
 				// call at 0 is t.Parallel OR t := suite.T(), it also means that no arrange is necessary. If both conditions are
@@ -83,6 +84,7 @@ func run(pass *analysis.Pass) (any, error) {
 							Message: "// Assert statement expected",
 						})
 					} else if !strings.Contains(commentsAfterAct[0].Text(), "Assert") {
+						fmt.Println(commentsAfterAct[0].Text(), pass.Fset.Position(commentsAfterAct[0].Pos()).Line)
 						pass.Report(analysis.Diagnostic{
 							Pos:     afterActStatement.Pos(),
 							End:     afterActStatement.End(),
@@ -120,13 +122,17 @@ func isArrangeRequired(pass *analysis.Pass, actIndex int, statements []ast.Stmt)
 	}
 }
 
-// findCommentsBetween filters comments between the 2 given positions, used primarily to split
+// findCommentsBetweenLines filters comments between the 2 given positions, used primarily to split
 // comments between the start, act and end of a test
-func findCommentsBetween(comments []*ast.CommentGroup, from token.Pos, to token.Pos) []*ast.CommentGroup {
+func findCommentsBetweenLines(pass *analysis.Pass, comments []*ast.CommentGroup, from token.Pos, to token.Pos) []*ast.CommentGroup {
 	result := make([]*ast.CommentGroup, 0, len(comments))
 
+	fromLine := pass.Fset.Position(from).Line
+	toLine := pass.Fset.Position(to).Line
+
 	for _, comment := range comments {
-		if comment.Pos() > from && comment.Pos() < to {
+		commentLine := pass.Fset.Position(comment.Pos()).Line
+		if commentLine > fromLine && commentLine < toLine {
 			result = append(result, comment)
 		}
 	}
