@@ -95,7 +95,7 @@ func TestNestedRun(t *testing.T) {
 func TestNestedRunMissingComments(t *testing.T) {
 	t.Run("outer", func(t *testing.T) {
 		t.Run("inner", func(t *testing.T) {
-			result := SayHello("Josh") // want `// Act statement expected`
+			result := SayHello("Josh")            // want `// Act statement expected`
 			assert.Equal(t, "Hello Josh", result) // want `// Assert statement expected`
 		})
 	})
@@ -103,7 +103,7 @@ func TestNestedRunMissingComments(t *testing.T) {
 
 func TestNestedRunOuterMissingComments(t *testing.T) {
 	t.Run("outer", func(t *testing.T) {
-		result := SayHello("Josh") // want `// Act statement expected`
+		result := SayHello("Josh")            // want `// Act statement expected`
 		assert.Equal(t, "Hello Josh", result) // want `// Assert statement expected`
 	})
 }
@@ -117,7 +117,7 @@ func TestNestedRunInnerOnlyMissingComments(t *testing.T) {
 		assert.Equal(t, "Hello Josh", result1)
 
 		t.Run("inner", func(t *testing.T) {
-			result2 := SayGoodbye("Anne") // want `// Act statement expected`
+			result2 := SayGoodbye("Anne")            // want `// Act statement expected`
 			assert.Equal(t, "Goodbye Anne", result2) // want `// Assert statement expected`
 		})
 	})
@@ -141,7 +141,7 @@ func TestTripleNestedRunMissingComments(t *testing.T) {
 	t.Run("level1", func(t *testing.T) {
 		t.Run("level2", func(t *testing.T) {
 			t.Run("level3", func(t *testing.T) {
-				result := SayHello("Josh") // want `// Act statement expected`
+				result := SayHello("Josh")            // want `// Act statement expected`
 				assert.Equal(t, "Hello Josh", result) // want `// Assert statement expected`
 			})
 		})
