@@ -1,4 +1,4 @@
-module github.com/survivorbat/go-triple-a-lint
+module github.com/survivorbat/go-triplea-lint
 
 // All versions here need to be the same as in golangci-lint/mod.go if present
 

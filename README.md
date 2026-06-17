@@ -17,7 +17,7 @@ package printer
 import (
   "testing"
 
-  "github.com/survivorbat/go-triple-a-lint/document"
+  "github.com/survivorbat/go-triplea-lint/document"
 
   "github.com/stretchr/testify/require"
   "github.com/stretchr/testify/assert"

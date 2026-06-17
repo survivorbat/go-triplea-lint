@@ -1,4 +1,4 @@
-module github.com/survivorbat/go-triple-a-lint/testdata/src/testlintdata
+module github.com/survivorbat/go-triplea-lint/testdata/src/testlintdata
 
 go 1.26.2
 

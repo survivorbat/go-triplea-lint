@@ -2,7 +2,7 @@
 package main
 
 import (
-	linters "github.com/survivorbat/go-triple-a-lint"
+	linters "github.com/survivorbat/go-triplea-lint"
 	"golang.org/x/tools/go/analysis"
 )
 
