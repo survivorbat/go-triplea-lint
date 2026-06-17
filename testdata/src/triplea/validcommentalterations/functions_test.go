@@ -65,7 +65,7 @@ func TestSayHello_RandomStars(t *testing.T) {
 	//**** Arrange
 	name := "Josh"
 
-	///**. Act
+	///** Act
 	actual := SayHello(name)
 
 	///*/**/* Assert

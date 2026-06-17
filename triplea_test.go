@@ -11,18 +11,25 @@ import (
 
 const rootTestDir = "testdata/src/triplea"
 
-func TestAnalyzer(t *testing.T) {
+func TestPlugin_BuildAnalyzers_AnalysesCorrectly(t *testing.T) {
 	t.Parallel()
 
 	for _, dirName := range getTestDirectories(t) {
 		t.Run(dirName, func(t *testing.T) {
 			// Arrange
-			analyzer := Analyzer()
+			plugin, err := New(nil)
+			require.NoError(t, err)
 
 			testDir := path.Join("triplea", dirName, "...")
 
-			// Act & Assert
-			analysistest.Run(t, analysistest.TestData(), analyzer, testDir)
+			// Act
+			actual, err := plugin.BuildAnalyzers()
+
+			// Assert
+			require.NoError(t, err)
+			require.Len(t, actual, 1)
+
+			analysistest.Run(t, analysistest.TestData(), actual[0], testDir)
 		})
 	}
 }

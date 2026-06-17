@@ -16,14 +16,6 @@ const (
 	Assert  = "Assert"
 )
 
-func Analyzer() *analysis.Analyzer {
-	return &analysis.Analyzer{
-		Name: "triplea",
-		Doc:  "TODO",
-		Run:  run,
-	}
-}
-
 func run(pass *analysis.Pass) (any, error) {
 	testFiles := findTestFunctions(pass)
 
